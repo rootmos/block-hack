@@ -16,10 +16,13 @@ ui: faucet
 faucet: $(KEYS_PATH)/faucet.json
 	$(PARITY) $(PARITY_OPTS) account import $<
 
+new-account:
+	$(PARITY) $(PARITY_OPTS) account new
+
 $(KEYS_PATH)/%.json:
 	$(ETHKEY) generate $@
 
 clean:
 	rm -rf $(PARITY_BASE)
 
-.PHONY: run ui faucet-key clean
+.PHONY: run ui faucet-key clean new-account
