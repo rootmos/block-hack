@@ -1,0 +1,23 @@
+{
+  "address": "4948653997c1cd1ac7c5d604f09271dec73c13b1",
+  "crypto": {
+    "cipher": "aes-128-ctr",
+    "ciphertext": "fc4b93e5b3803f9467d015c066fe50346e52fa834333689c28d8abb846759c91",
+    "cipherparams": {
+      "iv": "aa28b947545f47b7e16bb66cb15f2191"
+    },
+    "kdf": "scrypt",
+    "kdfparams": {
+      "dklen": 32,
+      "n": 262144,
+      "p": 1,
+      "r": 8,
+      "salt": "bddbedebfad9055739b47218db84c20f7f3628c292fc263c0c2f1895dd0e7e94"
+    },
+    "mac": "333e0d9bfed085b47e8d119e6374ad56330d8cbf954eb4f69c8442787b09df98"
+  },
+  "id": "3861f5dc-1611-4786-993a-e67ef86caf3a",
+  "version": 3,
+  "name": "Faucet",
+  "meta": "{\"passwordHint\":\"faucet\"}"
+}
