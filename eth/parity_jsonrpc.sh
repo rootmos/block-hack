@@ -54,3 +54,14 @@ hex_to_bin() {
 address_from_pub() {
     echo -n $1 | cut -c3- | hex_to_bin | kec | bin_to_hex | tail -c40
 }
+
+tx_hash() {
+    ./tx_rlp.py | kec
+}
+
+mk_tx() {
+    j='{"nounce":"'$1'","gasPrice":"'$GAS_PRICE'",'
+    j+='"gasLimit":"'$2'","to":"'$3'",'
+    j+='"value":"'$4'","data":"'$5'"}'
+    echo -n $j | jq .
+}

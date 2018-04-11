@@ -25,4 +25,11 @@ $(KEYS_PATH)/%.json:
 clean:
 	rm -rf $(PARITY_BASE)
 
-.PHONY: run ui faucet-key clean new-account
+PYTHON_DEPENDENCIES := requirements.txt.flag
+$(PYTHON_DEPENDENCIES): requirements.txt
+	pip install --user -r $<
+	touch $@
+
+dependencies: $(PYTHON_DEPENDENCIES)
+
+.PHONY: run ui faucet-key clean new-account dependencies
