@@ -74,10 +74,6 @@ pub_from_pem() {
     openssl ec -in $1 --pubout -outform DER
 }
 
-address_from_pub() {
-    bin_to_hex | address_from_pub
-}
-
 priv_from_keyfile() {
     password_raw=faucet
     password=$(echo -n $password_raw | base91)
@@ -85,10 +81,10 @@ priv_from_keyfile() {
     salt_size=$(jq -r '.crypto.kdfparams.salt' < $1 | hex_to_bin | wc -c)
     N=$(jq -r '.crypto.kdfparams.n' < $1)
     p=$(jq -r '.crypto.kdfparams.p' < $1)
-    r=$(jq -r '.crypto.kdfparams.r' < $1)
+    R=$(jq -r '.crypto.kdfparams.r' < $1)
     size=$(jq -r '.crypto.kdfparams.dklen' < $1)
-    derived_key=$(scrypt-kdf --base91-input $password $salt $N $p $r $size $salt_size | base91 --decode | bin_to_hex)
-    key=$(echo -n $derived_key | head -c8)
+    derived_key=$(scrypt-kdf --base91-input $password $salt $N $R $p $(calc -p 8*$size) $salt_size | cut -d- -f1 | base91 --decode | bin_to_hex)
+    key=$(echo -n $derived_key | head -c32)
     cipher=$(jq -r '.crypto.cipher' < $1)
     iv=$(jq -r '.crypto.cipherparams.iv' < $1)
     jq -r '.crypto.ciphertext' < $1 \
@@ -96,3 +92,5 @@ priv_from_keyfile() {
         | openssl enc -$cipher -iv $iv -K $key -d \
         | bin_to_hex
 }
+
+"$@"
