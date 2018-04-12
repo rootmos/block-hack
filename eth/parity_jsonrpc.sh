@@ -75,8 +75,7 @@ pub_from_pem() {
 }
 
 priv_from_keyfile() {
-    password_raw=faucet
-    password=$(echo -n $password_raw | base91)
+    password=$(echo -n $2 | base91)
     salt=$(jq -r '.crypto.kdfparams.salt' < $1 | hex_to_bin | base91)
     salt_size=$(jq -r '.crypto.kdfparams.salt' < $1 | hex_to_bin | wc -c)
     N=$(jq -r '.crypto.kdfparams.n' < $1)
@@ -91,6 +90,10 @@ priv_from_keyfile() {
         | hex_to_bin \
         | openssl enc -$cipher -iv $iv -K $key -d \
         | bin_to_hex
+}
+
+priv_to_pem() {
+    hex_to_bin | asn/convert | openssl ec -inform der -outform pem -out $1
 }
 
 "$@"
