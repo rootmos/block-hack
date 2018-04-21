@@ -4,7 +4,8 @@ KEYS_PATH := $(CURRENT_DIR)/keys
 
 PARITY := parity
 PARITY_BASE := $(CURRENT_DIR)/.parity
-PARITY_OPTS := --base-path=$(PARITY_BASE) --chain $(CURRENT_DIR)/dev-chain.json
+PARITY_UNLOCK := --unlock 0x$(shell jq -r .address keys/faucet.json) --password=keys/faucet.password
+PARITY_OPTS := --port 0 --reserved-peers ./peers --base-path=$(PARITY_BASE) --chain $(CURRENT_DIR)/dev-chain.json $(PARITY_UNLOCK) --jsonrpc-cors http://localhost --reseal-min-period 0
 ETHKEY := ethkey
 
 run: faucet
@@ -32,4 +33,13 @@ $(PYTHON_DEPENDENCIES): requirements.txt
 
 dependencies: $(PYTHON_DEPENDENCIES)
 
-.PHONY: run ui faucet-key clean new-account dependencies
+geth:
+	geth --datadir=geth-data init genesis.json
+	geth --rpc --nodiscover --networkid=66 \
+	   --datadir=geth-data \
+	   --etherbase=0x0000000000000000000000000000000000000002 \
+	   --unlock $(shell jq -r .address keys/faucet.json) --password keys/faucet.password \
+	   --dev.period 0 console
+
+.PHONY: run ui faucet-key clean new-account dependencies geth
+

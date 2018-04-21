@@ -39,6 +39,10 @@ getBalance() {
         | wei_to_ether
 }
 
+blockNumber() {
+    jq -n '[]' | envelope eth_blockNumber | send | handle_response
+}
+
 kec() {
     keccak-256sum -b -
 }
@@ -59,10 +63,19 @@ tx_hash() {
     ./tx_rlp.py | kec
 }
 
-mk_tx() {
-    j='{"nounce":"'$1'","gasPrice":"'$GAS_PRICE'",'
-    j+='"gasLimit":"'$2'","to":"'$3'",'
-    j+='"value":"'$4'","data":"'$5'"}'
+mk_unsigned_tx() {
+    j='{"nounce":"'$NOUNCE'","gasPrice":"'$GAS_PRICE'",'
+    j+='"gasLimit":"'$GAS_LIMIT'","to":"'$TO'",'
+    j+='"value":"'$VALUE'","data":"'$DATA'",'
+    j+='"chain_id":"'$(chain_id)'"}'
+    echo -n $j | jq .
+}
+
+mk_signed_tx() {
+    j='{"nounce":"'$NOUNCE'","gasPrice":"'$GAS_PRICE'",'
+    j+='"gasLimit":"'$GAS_LIMIT'","to":"'$TO'",'
+    j+='"value":"'$VALUE'","data":"'$DATA'",'
+    j+='"r":"'$R'","s":"'$S'", "w":"'$W'"}'
     echo -n $j | jq .
 }
 
@@ -94,6 +107,48 @@ priv_from_keyfile() {
 
 priv_to_pem() {
     hex_to_bin | asn/convert | openssl ec -inform der -outform pem -out $1
+}
+
+ecsign() {
+    openssl dgst -sha256 -binary -sign $1
+}
+
+T_r() {
+    head -c32
+}
+
+T_s() {
+    tail -c+33 | head -c32
+}
+
+bin_to_dec() {
+    bin_to_hex | sed 's/^/0x/' | hex_to_dec
+}
+
+chain_id() {
+    cat ${CHAIN-dev-chain.json} | jq -r .params.chainId | hex_to_dec
+}
+
+sign() {
+    export NOUNCE=$1
+    export GAS_PRICE=$2
+    export GAS_LIMIT=$3
+    export TO=$4
+    export VALUE=$5
+    export DATA=$6
+    export UTX_HASH=$(mk_unsigned_tx | tx_hash | bin_to_hex)
+    export SIG=$(echo $UTX_HASH | hex_to_bin | ecsign $7 | bin_to_hex)
+    export R=$(echo $SIG | hex_to_bin | T_r | bin_to_dec)
+    export S=$(echo $SIG | hex_to_bin | T_s | bin_to_dec)
+    export W=$(calc -p $(chain_id)*2+35)
+    mk_signed_tx
+}
+
+send_tx() {
+    read tx
+    jq -n '["0x'$tx'"]' \
+        | envelope eth_sendRawTransaction \
+        | send | handle_response
 }
 
 "$@"

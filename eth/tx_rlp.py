@@ -16,6 +16,7 @@ def L_S(t) : #(Tn, Tp, Tg, Tt, Tv, p) if v ∈ {27, 28}
         bytes.fromhex(j["to"]),
         int(j["value"]),
         bytes.fromhex(j["data"])]
+
     list_sedes = List([
         big_endian_int,
         big_endian_int,
@@ -24,6 +25,14 @@ def L_S(t) : #(Tn, Tp, Tg, Tt, Tv, p) if v ∈ {27, 28}
         big_endian_int,
         binary
         ])
+
+    if "w" in j:
+        fs += [int(j["w"]), int(j["r"]), int(j["s"])]
+        list_sedes += [big_endian_int, big_endian_int, big_endian_int]
+    else:
+        fs += [int(j["chain_id"]), bytes.fromhex(""), bytes.fromhex("")]
+        list_sedes += [big_endian_int, binary, binary]
+
     return rlp.encode(fs, list_sedes)
 
 sys.stdout.buffer.write(rlp.encode(L_S(j)))
