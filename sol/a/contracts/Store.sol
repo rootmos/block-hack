@@ -4,7 +4,7 @@ contract SimpleStorage {
     uint myVariable;
 
     function set(uint x) public {
-        myVariable = x;
+        myVariable = x + 2;
     }
 
     function get() constant public returns (uint) {

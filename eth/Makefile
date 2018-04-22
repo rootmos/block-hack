@@ -35,11 +35,13 @@ dependencies: $(PYTHON_DEPENDENCIES)
 
 geth:
 	geth --datadir=geth-data init genesis.json
-	geth --rpc --nodiscover --networkid=66 \
+	nice geth --rpc --nodiscover --networkid=66 \
 	   --datadir=geth-data \
 	   --etherbase=0x0000000000000000000000000000000000000002 \
 	   --unlock $(shell jq -r .address keys/faucet.json) --password keys/faucet.password \
-	   --dev.period 0 console
+	   --dev.period 0 \
+	   --mine --minerthreads=1 \
+	   console
 
 .PHONY: run ui faucet-key clean new-account dependencies geth
 
